@@ -16,8 +16,8 @@ public class FilterConfig {
     public FilterRegistrationBean<AuthMiddleware> authFilter() {
         FilterRegistrationBean<AuthMiddleware> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new AuthMiddleware());
-        registrationBean.addUrlPatterns("/api/player/*", "/api/designer/*"); // Apply to both player and designer
-        registrationBean.setOrder(1); // AuthMiddleware should be executed first
+        registrationBean.addUrlPatterns("/api/player/*", "/api/designer/*");
+        registrationBean.setOrder(1);
         return registrationBean;
     }
 

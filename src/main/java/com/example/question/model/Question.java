@@ -54,5 +54,4 @@ public class Question {
     @OneToMany(mappedBy = "question")
     private List<UserAnswer> userAnswers;
 
-    // Getters and Setters
 }

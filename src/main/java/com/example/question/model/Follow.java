@@ -24,5 +24,4 @@ public class Follow {
     @JoinColumn(name = "follower_id", insertable = false, updatable = false)
     private User follower;
 
-    // Getters and Setters
 }

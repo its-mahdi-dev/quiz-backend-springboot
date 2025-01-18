@@ -4,10 +4,15 @@ import com.example.question.dto.Response;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -20,11 +25,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Response> handleValidationException(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getAllErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-        Response errorResponse = new Response(message, HttpStatus.BAD_REQUEST.value());
+    public ResponseEntity<Response> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<String> errors = new ArrayList<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.add(fieldName + " " + errorMessage);
+        });
+        Response errorResponse = new Response(errors.toString(), HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -45,11 +53,6 @@ public class GlobalExceptionHandler {
         Response errorResponse = new Response(ex.getMessage(), HttpStatus.UNAUTHORIZED.value());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
-    // @ExceptionHandler(BadRequestException.class)
-    // public ResponseEntity<Response> handleBadRequestException(BadRequestException ex) {
-    //     Response errorResponse = new Response(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-    //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    // }
    
 
 

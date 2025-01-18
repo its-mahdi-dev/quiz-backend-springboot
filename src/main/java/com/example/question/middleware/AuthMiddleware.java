@@ -29,7 +29,6 @@ public class AuthMiddleware extends OncePerRequestFilter {
             throws ServletException, IOException {
         String path = request.getRequestURI();
 
-        // Skip middleware for `/api/auth/**`
         if (path.startsWith("/api/auth/")) {
             filterChain.doFilter(request, response);
             return;
@@ -38,7 +37,7 @@ public class AuthMiddleware extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            respondWithUnauthorized(response , "sa");
+            respondWithUnauthorized(response);
             return;
         }
 
@@ -48,22 +47,21 @@ public class AuthMiddleware extends OncePerRequestFilter {
             DecodedJWT decodedJWT = JwtUtil.verifyToken(token);
             Long userId = decodedJWT.getClaim("id").asLong();
             String userType = decodedJWT.getClaim("type").asString();
-            // Set attributes on the request
             request.setAttribute("userId", userId);
             request.setAttribute("userType", userType);
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            respondWithUnauthorized(response , "re");
+            respondWithUnauthorized(response);
         }
     }
 
-    private void respondWithUnauthorized(HttpServletResponse response , String gt) throws IOException {
+    private void respondWithUnauthorized(HttpServletResponse response) throws IOException {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         Map<String, String> resp = new HashMap<>();
         resp.put("message", UserResponse.UNAUTHORIZED);
-        response.getWriter().write(new ObjectMapper().writeValueAsString(gt));
+        response.getWriter().write(new ObjectMapper().writeValueAsString(resp));
     }
 }

@@ -29,15 +29,13 @@ public class DesignerMiddleware extends OncePerRequestFilter {
         HttpServletRequestWrapper wrappedRequest = new HttpServletRequestWrapper(request) {
             @Override
             public Object getAttribute(String name) {
-                return super.getAttribute(name); // Ensure all attributes are preserved
+                return super.getAttribute(name);
             }
         };
         if (path.startsWith("/api/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // Wrap the request to preserve attributes
         
 
         if (!"designer".equals(userType)) {

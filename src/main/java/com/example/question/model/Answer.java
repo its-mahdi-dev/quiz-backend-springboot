@@ -25,5 +25,4 @@ public class Answer {
     @JoinColumn(name = "question_id", insertable = false, updatable = false)
     private Question question;
 
-    // Getters and Setters
 }

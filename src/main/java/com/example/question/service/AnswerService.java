@@ -22,11 +22,10 @@ public class AnswerService {
     private UserAnswerRepository userAnswerRepository;
 
     @Autowired
-    private RedisService redisService; // Service for interacting with Redis
+    private RedisService redisService;
 
     @Transactional
     public String submitPlayerAnswer(Long userId, Long questionId, Long answerId) {
-        // Fetch the question from the database
         Optional<Question> questionOptional = questionRepository.findById(questionId);
         if (questionOptional.isEmpty()) {
             throw new BadRequestException("سوال پیدا نشد");
@@ -35,7 +34,6 @@ public class AnswerService {
         Question question = questionOptional.get();
         LocalDateTime now = LocalDateTime.now();
 
-        // Check if the question has started or ended
         if (question.getStartTime().isAfter(now)) {
             throw new BadRequestException("هنوز سوال شروع نشده!");
         }
@@ -43,7 +41,6 @@ public class AnswerService {
             throw new BadRequestException("زمان پاسخگویی به این سوال تموم شده!");
         }
 
-        // Check if the user has already answered the question
         Optional<UserAnswer> userAnswerOptional = userAnswerRepository.findByUserIdAndQuestionId(userId, questionId);
         if (userAnswerOptional.isPresent()) {
             throw new BadRequestException("شما قبلا به این سوال پاسخ داده اید");
@@ -61,7 +58,6 @@ public class AnswerService {
             throw new BadRequestException("شما وارد این سوال نشده اید" );
         }
 
-        // Save the user's answer
         UserAnswer userAnswer = new UserAnswer();
         userAnswer.setQuestionId(questionId);
         userAnswer.setAnswerId(answerId);
