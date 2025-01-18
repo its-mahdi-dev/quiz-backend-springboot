@@ -20,7 +20,6 @@ public class CategoryService {
     public Map<String, Object> getCategories(int page, int limit, String search) {
         int offset = (page - 1) * limit;
 
-        // Search condition
         List<Category> categories;
         long totalItems;
 

@@ -1,4 +1,6 @@
 package com.example.question.model;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -61,5 +63,36 @@ public class User {
 
     public enum UserType {
         designer, player
+    }
+
+    public User maskData(String[] attributes) {
+        if (attributes == null || attributes.length == 0) {
+            return null; // Return null if input is invalid
+        }
+
+        try {
+            // Create a new User object to populate masked fields
+            User maskedUser = new User();
+            List<String> attrList = Arrays.asList(attributes);
+            Class<?> userClass = this.getClass();
+
+            // Iterate over all fields of the User class
+            for (Field field : userClass.getDeclaredFields()) {
+                field.setAccessible(true); // Allow access to private fields
+                if (attrList.contains(field.getName())) {
+                    // If the field is in the attributes list, copy its value
+                    Object value = field.get(this);
+                    field.set(maskedUser, value);
+                } else {
+                    // Otherwise, set the field to null (optional, as new fields are null by default)
+                    field.set(maskedUser, null);
+                }
+            }
+
+            return maskedUser;
+
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Error masking data for User object", e);
+        }
     }
 }
