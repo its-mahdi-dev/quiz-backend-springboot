@@ -39,7 +39,7 @@ public class AuthService {
 
         return JWT.create()
                 .withSubject(user.getId().toString())
-                .withClaim("phone", user.getPhone())
+                .withClaim("id", user.getId())
                 .withClaim("type", user.getType().toString())
                 .withExpiresAt(Date.from(Instant.now().plusSeconds(18000)))
                 .sign(Algorithm.HMAC256(secretKey));

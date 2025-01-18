@@ -2,12 +2,12 @@ package com.example.question.dto;
 
 import java.time.LocalDateTime;
 
-public class ErrorResponse {
+public class Response {
     private String message;
     private int status;
     private LocalDateTime timestamp;
 
-    public ErrorResponse(String message, int status) {
+    public Response(String message, int status) {
         this.message = message;
         this.status = status;
         this.timestamp = LocalDateTime.now();
