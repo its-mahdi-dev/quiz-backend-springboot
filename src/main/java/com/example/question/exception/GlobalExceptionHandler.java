@@ -2,6 +2,8 @@ package com.example.question.exception;
 
 import com.example.question.dto.Response;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -52,6 +54,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response> handleUnAuthorizedException(UnAuthorizedException ex) {
         Response errorResponse = new Response(ex.getMessage(), HttpStatus.UNAUTHORIZED.value());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Response> handleEntityNotFoundException(EntityNotFoundException ex) {
+        Response errorResponse = new Response(ex.getMessage(), HttpStatus.NOT_FOUND.value());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
    
 

@@ -25,4 +25,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByTypeAndSearch(@Param("type") UserType type,
                                    @Param("search") String search,
                                    Pageable pageable);
+                                   
 }

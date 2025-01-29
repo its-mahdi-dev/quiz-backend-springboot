@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-
 @Data
 @Entity
 @Table(name = "answers")
@@ -27,6 +26,7 @@ public class Answer {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
 
+    @Column(name = "answer_order", nullable = false)
     private Integer order;
 
     @ManyToOne

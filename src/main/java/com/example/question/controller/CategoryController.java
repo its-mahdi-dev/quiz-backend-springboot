@@ -1,4 +1,5 @@
 package com.example.question.controller;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,22 +27,14 @@ public class CategoryController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of(
-                "message", "Server error",
-                "error", e.getMessage()
-            ));
+                    "message", "Server error",
+                    "error", e.getMessage()));
         }
     }
 
     @PostMapping
-    public ResponseEntity<?> addCategory(@Validated @RequestBody CategoryRequest  requestBody) {
-        try {
-            categoryService.addCategory(requestBody.getName());
-            return ResponseEntity.status(201).body(Map.of("message", "دسته بندی با موفقیت اضافه شد"));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of(
-                "message", "Server error",
-                "error", e.getMessage()
-            ));
-        }
+    public ResponseEntity<?> addCategory(@Validated @RequestBody CategoryRequest requestBody) {
+        categoryService.addCategory(requestBody.getName());
+        return ResponseEntity.status(201).body(Map.of("message", "دسته بندی با موفقیت اضافه شد"));
     }
 }

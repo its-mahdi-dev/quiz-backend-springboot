@@ -1,14 +1,16 @@
 package com.example.question.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.question.dto.QuestionDTO;
 import com.example.question.service.QuestionService;
 
 @RestController
 @RequestMapping("/api/player")
-public class QuestionController {
+public class PlayerController {
 
     @Autowired
     private QuestionService questionService;
@@ -30,14 +32,17 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.getPlayersScores(page, limit, search));
     }
 
-    // @GetMapping("/questions/{questionId}")
-    // public ResponseEntity<?> getSingleQuestion(@PathVariable("questionId") Long questionId,
-    //         @RequestAttribute("userId") Long userId) {
-    //     return ResponseEntity.ok(questionService.getSingleQuestion(userId, questionId));
-    // }
+    @GetMapping("questions/random")
+    public ResponseEntity<Long> getRandomQuestion(@RequestAttribute("userId") Long userId) {
+        Long questionId = questionService.getRandomQuestion(userId);
+        return ResponseEntity.ok(questionId);
+    }
+    @GetMapping("/questions/{question_id}")
+    public ResponseEntity<QuestionDTO> getSingleQuestion(@RequestAttribute("userId") Long userId,
+            @PathVariable Long question_id) {
 
-    // @GetMapping("/random")
-    // public ResponseEntity<?> getRandomQuestion(@RequestAttribute("userId") Long userId) {
-    //     return ResponseEntity.ok(questionService.getRandomQuestion(userId));
-    // }
+        QuestionDTO questionDTO = questionService.getSingleQuestion(userId, question_id);
+        return ResponseEntity.ok(questionDTO);
+    }
+
 }
