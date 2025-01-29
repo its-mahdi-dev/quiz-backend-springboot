@@ -61,10 +61,11 @@ public class User {
         type = UserType.valueOf(newType.toUpperCase());
     }
 
-    public enum UserType {
-        designer, player
-    }
+    
 
+    public static UserType getuUserType(String type){
+        return UserType.valueOf(type.toUpperCase());
+    }
     public User maskData(String[] attributes) {
         if (attributes == null || attributes.length == 0) {
             return null; // Return null if input is invalid
