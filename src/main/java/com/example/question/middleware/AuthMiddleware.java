@@ -49,6 +49,10 @@ public class AuthMiddleware extends OncePerRequestFilter {
             String userType = decodedJWT.getClaim("type").asString();
             request.setAttribute("userId", userId);
             request.setAttribute("userType", userType);
+            if (path.startsWith("/api/designer/") && !userType.equals("designer")) {
+                respondWithUnauthorized(response);
+                return;
+            }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             respondWithUnauthorized(response);

@@ -26,9 +26,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll())
-                .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());  // This applies default CORS config
+                .cors().configurationSource(request -> {
+                    CorsConfiguration corsConfig = new CorsConfiguration();
+                    corsConfig.addAllowedOrigin("*"); // Allow all origins
+                    corsConfig.addAllowedMethod("*"); // Allow all HTTP methods (GET, POST, etc.)
+                    corsConfig.addAllowedHeader("*"); // Allow all headers
+                    return corsConfig;
+                });
         return http.build();
     }
-
 
 }

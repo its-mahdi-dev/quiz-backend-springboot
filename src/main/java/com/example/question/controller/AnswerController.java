@@ -14,10 +14,10 @@ public class AnswerController {
     @Autowired
     private AnswerService answerService;
 
-    @PostMapping("/submit/{questionId}")
+    @PostMapping("/questions/{questionId}")
     public ResponseEntity<?> submitPlayerAnswer(
             @PathVariable("questionId") Long questionId,
-            @RequestParam Long answer_id,
+            @RequestParam("answer_id") Long answer_id,
             @RequestAttribute("userId") Long userId) {
 
         String responseMessage = answerService.submitPlayerAnswer(userId, questionId, answer_id);

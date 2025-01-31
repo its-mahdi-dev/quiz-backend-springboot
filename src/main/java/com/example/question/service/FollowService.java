@@ -11,6 +11,7 @@ import com.example.question.repository.UserRepository;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,5 +61,11 @@ public class FollowService {
         Follow follow = followRepository.findByFollowingIdAndFollowerId(userId, followerId)
                 .orElseThrow(() -> new RuntimeException("Follow relationship not found"));
         followRepository.delete(follow);
+    }
+
+    public boolean checkIfUserFollows(Long followingId, Long followerId) {
+        // Check if a follow relationship exists
+        Optional<Follow> follow = followRepository.findByFollowingIdAndFollowerId(followingId, followerId);
+        return follow.isPresent();
     }
 }

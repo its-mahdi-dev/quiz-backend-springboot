@@ -15,6 +15,8 @@ import lombok.Data;
 public class QuestionDTO {
     private Long id;
 
+    private Long userId;
+
     @NotBlank
     private String body;
 
@@ -34,9 +36,10 @@ public class QuestionDTO {
     @NotEmpty
     @Size(min = 4, max = 4)
     private List<AnswerDTO> answers;
+
     private UserDTO user;
 
     @NotNull
-    private Long correctAnswer;
+    private Long correctAnswerId;
 
 }

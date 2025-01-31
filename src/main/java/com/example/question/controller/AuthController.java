@@ -3,6 +3,9 @@ package com.example.question.controller;
 import com.example.question.dto.LoginRequest;
 import com.example.question.dto.SignupRequest;
 import com.example.question.service.AuthService;
+
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +22,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Validated @RequestBody LoginRequest loginRequest) {
-        String token = authService.login(loginRequest);
+        Map<String,String> token = authService.login(loginRequest);
         return ResponseEntity.ok().body(token);
     }
 

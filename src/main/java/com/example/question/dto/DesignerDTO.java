@@ -9,10 +9,12 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class UserDTO {
+public class DesignerDTO {
     private Long Id;
     private String first_name;
     private String last_name;
-
+    private List<QuestionDTO> questions;
+    private Double dificultly;
+    
 
 }

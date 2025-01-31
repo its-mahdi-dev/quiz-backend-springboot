@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -26,7 +27,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String login(LoginRequest loginRequest) {
+    public Map<String, String> login(LoginRequest loginRequest) {
         Optional<User> userOptional = userRepository.findByPhone(loginRequest.getPhone());
         if (userOptional.isEmpty()) {
             throw new IllegalArgumentException("Invalid phone");
@@ -37,12 +38,16 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid phone or password");
         }
 
-        return JWT.create()
+        String token = JWT.create()
                 .withSubject(user.getId().toString())
                 .withClaim("id", user.getId())
                 .withClaim("type", user.getType().toString())
                 .withExpiresAt(Date.from(Instant.now().plusSeconds(18000)))
                 .sign(Algorithm.HMAC256(secretKey));
+
+        Map<String, String> response = Map.of("token", token, "type", user.getType().toString());
+
+        return response;
     }
 
     public String signup(SignupRequest signupRequest) {
@@ -67,5 +72,5 @@ public class AuthService {
                 .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
                 .sign(Algorithm.HMAC256(secretKey));
     }
-    
+
 }

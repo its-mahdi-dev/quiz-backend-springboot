@@ -7,12 +7,14 @@ import com.example.question.dto.QuestionDTO;
 import com.example.question.dto.UserDTO;
 import com.example.question.exception.BadRequestException;
 import com.example.question.model.Answer;
+import com.example.question.model.Follow;
 import com.example.question.model.Question;
 import com.example.question.model.User;
 import com.example.question.model.UserAnswer;
 import com.example.question.model.UserType;
 import com.example.question.repository.AnswerRepository;
 import com.example.question.repository.CategoryRepository;
+import com.example.question.repository.FollowRepository;
 import com.example.question.repository.QuestionRepository;
 import com.example.question.repository.UserAnswerRepository;
 import com.example.question.repository.UserRepository;
@@ -64,6 +66,9 @@ public class QuestionService {
     @Autowired
     private RedisService redisService;
 
+    @Autowired
+    private FollowRepository followRepository;
+
     public Map<String, Object> getPlayerQuestions(Long userId, int page, int limit, String search) {
         try {
             Pageable pageable = PageRequest.of(page - 1, limit);
@@ -71,30 +76,32 @@ public class QuestionService {
             List<UserAnswer> userAnswers = userAnswerRepository.findPlayerQuestions(userId, search, pageable);
             long totalAnswers = userAnswerRepository.countPlayerQuestions(userId, search);
 
-            List<Map<String, Object>> data = new ArrayList<>();
+            List<PlayerQuestionDTO> data = new ArrayList<>();
             for (UserAnswer userAnswer : userAnswers) {
                 Question question = userAnswer.getQuestion();
                 if (question == null)
                     continue;
 
-                Map<String, Object> questionData = new HashMap<>();
-                questionData.put("category_id", question.getCategoryId());
-                questionData.put("body", question.getBody());
-                questionData.put("correct_answer_id", question.getCorrectAnswerId());
-                questionData.put("duration", question.getDuration());
-
-                Map<String, Object> categoryData = new HashMap<>();
-                if (question.getCategory() != null) {
-                    categoryData.put("name", question.getCategory().getName());
-                }
-                questionData.put("category", categoryData);
-                List<Map<String, Object>> answers = new ArrayList<>();
+                PlayerQuestionDTO questionData = new PlayerQuestionDTO();
+                questionData.setCategoryName(question.getCategory().getName());
+                questionData.setBody(question.getBody());
+                questionData.setCorrectAnswerId(question.getCorrectAnswerId());
+                questionData.setDuration((long) question.getDuration());
+                AnswerDTO answerDTO = new AnswerDTO();
+                answerDTO.setBody(userAnswer.getAnswer().getBody());
+                answerDTO.setId(userAnswer.getAnswer().getId());
+                answerDTO.setOrder(userAnswer.getAnswer().getOrder());
+                questionData.setAnswer(answerDTO);
+                List<AnswerDTO> answers = new ArrayList<>();
                 for (Answer answer : question.getAnswers()) {
-                    answers.add(getAnswer(answer));
+                    AnswerDTO answerDto = new AnswerDTO();
+                    answerDto.setBody(answer.getBody());
+                    answerDto.setId(answer.getId());
+                    answerDto.setOrder(answer.getOrder());
+                    answers.add(answerDto);
                 }
-                questionData.put("answers", answers);
-                questionData.put("answer", getAnswer(userAnswer.getAnswer()));
-                questionData.put("selected_answer", userAnswer.getAnswerId());
+                questionData.setAnswers(answers);
+                questionData.setSelectedAnswer(userAnswer.getAnswerId());
 
                 data.add(questionData);
             }
@@ -115,15 +122,8 @@ public class QuestionService {
         }
     }
 
-    Map<String, Object> getAnswer(Answer answer) {
-        Map<String, Object> new_answer = new HashMap<>();
-        new_answer.put("body", answer.getBody());
-        new_answer.put("order", answer.getOrder());
-        return new_answer;
-    }
-
     @Transactional
-    public Map<String, Object> getPlayersScores(int page, int limit, String search) {
+    public Map<String, Object> getPlayersScores(Long userId, int page, int limit, String search) {
         Pageable pageable = PageRequest.of(page - 1, limit);
         Page<User> users = userRepository.findByTypeAndSearch(UserType.player, search, pageable);
 
@@ -148,6 +148,8 @@ public class QuestionService {
                     dto.setCorrectAnswers(correctAnswers);
                     dto.setWrongAnswers(wrongAnswers);
 
+                    Optional<Follow> follow = followRepository.findByFollowingIdAndFollowerId(userId, user.getId());
+                    dto.setIsFollowing(follow.isPresent());
                     return dto;
                 }).collect(Collectors.toList());
 
@@ -160,9 +162,9 @@ public class QuestionService {
     public QuestionDTO getSingleQuestion(Long userId, Long questionId) {
         String cacheKey = "questions:" + userId + ":" + questionId;
 
-        String duration = (String) redisService.get(cacheKey);
+        Long duration = (Long) redisService.get(cacheKey);
         if (duration == null) {
-            redisService.set(cacheKey, String.valueOf(System.currentTimeMillis()));
+            redisService.set(cacheKey, System.currentTimeMillis());
         }
 
         Optional<Question> question = questionRepository.findById(questionId);
@@ -179,12 +181,16 @@ public class QuestionService {
                     .map(answer -> {
                         AnswerDTO answerDTO = new AnswerDTO();
                         answerDTO.setId(answer.getId());
-                        answerDTO.setAnswerText(answer.getBody());
+                        answerDTO.setBody(answer.getBody());
                         answerDTO.setOrder(answer.getOrder());
                         return answerDTO;
                     }).collect(Collectors.toList());
             dto.setAnswers(answers);
-
+            UserDTO userDTO = new UserDTO();
+            userDTO.setFirst_name(question.get().getUser().getFirstName());
+            userDTO.setLast_name(question.get().getUser().getLastName());
+            userDTO.setId(question.get().getUser().getId());
+            dto.setUser(userDTO);
             return dto;
         }
         throw new EntityNotFoundException("Question not found");
@@ -208,7 +214,7 @@ public class QuestionService {
                             .map(answer -> {
                                 AnswerDTO answerDTO = new AnswerDTO();
                                 answerDTO.setId(answer.getId());
-                                answerDTO.setAnswerText(answer.getBody());
+                                answerDTO.setBody(answer.getBody());
                                 answerDTO.setOrder(answer.getOrder());
                                 return answerDTO;
                             }).collect(Collectors.toList());
@@ -220,6 +226,8 @@ public class QuestionService {
                     user.setId(question.getUser().getId());
                     user.setLast_name(question.getUser().getLastName());
                     dto.setUser(user);
+
+                    dto.setCorrectAnswerId(question.getCorrectAnswerId());
                     return dto;
                 }).collect(Collectors.toList());
 
@@ -265,11 +273,11 @@ public class QuestionService {
         for (int i = 0; i < questionDTO.getAnswers().size(); i++) {
             AnswerDTO answerData = questionDTO.getAnswers().get(i);
             Answer answer = new Answer();
-            answer.setBody(answerData.getAnswerText());
+            answer.setBody(answerData.getBody());
             answer.setOrder(i);
             answer.setQuestionId(question.getId());
 
-            if (i == questionDTO.getCorrectAnswer()) {
+            if (i == questionDTO.getCorrectAnswerId()) {
                 correctAnswerId = answer.getId();
             }
             answers.add(answer);
@@ -277,9 +285,9 @@ public class QuestionService {
 
         List<Answer> savedAnswers = answerRepository.saveAll(answers);
 
-        if (questionDTO.getCorrectAnswer() != null && questionDTO.getCorrectAnswer() >= 0
-                && questionDTO.getCorrectAnswer() < savedAnswers.size()) {
-            int correctAnswerIndex = questionDTO.getCorrectAnswer().intValue();
+        if (questionDTO.getCorrectAnswerId() != null && questionDTO.getCorrectAnswerId() >= 0
+                && questionDTO.getCorrectAnswerId() < savedAnswers.size()) {
+            int correctAnswerIndex = questionDTO.getCorrectAnswerId().intValue();
             correctAnswerId = savedAnswers.get(correctAnswerIndex).getId();
         }
 
@@ -299,8 +307,8 @@ public class QuestionService {
         return meta;
     }
 
-    private Integer calculateDuration(Question question, String duration) {
-        long newDuration = (duration != null) ? System.currentTimeMillis() - Long.parseLong(duration) : 0;
+    private Integer calculateDuration(Question question, Long duration) {
+        long newDuration = (duration != null) ? System.currentTimeMillis() - duration : 0;
         return (int) (question.getDuration() - Math.ceil((double) newDuration / 1000));
     }
 }

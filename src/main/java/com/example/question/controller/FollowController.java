@@ -19,15 +19,23 @@ public class FollowController {
     private FollowService followService;
 
     @GetMapping("/followers")
-    public ResponseEntity<List<User>> getFollowers(@RequestParam(required = false) Long userId, @RequestAttribute("userId") Long currentUserId) {
+    public ResponseEntity<List<User>> getFollowers(@RequestParam(required = false) Long userId,
+            @RequestAttribute("userId") Long currentUserId) {
         Long idToFetch = (userId != null) ? userId : currentUserId;
         return ResponseEntity.ok(followService.getFollowers(idToFetch));
     }
 
     @GetMapping("/followings")
-    public ResponseEntity<List<User>> getFollowings(@RequestParam(required = false) Long userId, @RequestAttribute("userId") Long currentUserId) {
+    public ResponseEntity<List<User>> getFollowings(@RequestParam(required = false) Long userId,
+            @RequestAttribute("userId") Long currentUserId) {
         Long idToFetch = (userId != null) ? userId : currentUserId;
         return ResponseEntity.ok(followService.getFollowings(idToFetch));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Response> getStatus(@PathVariable("id") Long id, @RequestAttribute("userId") Long userId) {
+        boolean status = followService.checkIfUserFollows(userId, id);
+        return ResponseEntity.ok(new Response(String.valueOf(status), 201));
     }
 
     @PostMapping("/{id}")

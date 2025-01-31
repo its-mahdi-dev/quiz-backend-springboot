@@ -46,7 +46,6 @@ public class AnswerService {
             throw new BadRequestException("شما قبلا به این سوال پاسخ داده اید");
         }
 
-        // Check Redis cache for duration
         String cacheKey = "questions:" + userId + ":" + questionId;
         Long duration = (Long) redisService.get(cacheKey);
         if (duration != null) {

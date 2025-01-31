@@ -26,10 +26,11 @@ public class PlayerController {
 
     @GetMapping("/scores")
     public ResponseEntity<?> getPlayersScores(
+            @RequestAttribute("userId") Long userId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(defaultValue = "") String search) {
-        return ResponseEntity.ok(questionService.getPlayersScores(page, limit, search));
+        return ResponseEntity.ok(questionService.getPlayersScores(userId, page, limit, search));
     }
 
     @GetMapping("questions/random")
@@ -37,6 +38,7 @@ public class PlayerController {
         Long questionId = questionService.getRandomQuestion(userId);
         return ResponseEntity.ok(questionId);
     }
+
     @GetMapping("/questions/{question_id}")
     public ResponseEntity<QuestionDTO> getSingleQuestion(@RequestAttribute("userId") Long userId,
             @PathVariable Long question_id) {
