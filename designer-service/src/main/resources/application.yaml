@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: designer-service
+  datasource:
+    url: jdbc:mysql://mysql:3306/question?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: user1
+    password: pass1
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+
+server:
+  port: 8082

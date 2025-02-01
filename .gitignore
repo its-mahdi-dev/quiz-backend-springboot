@@ -1,5 +1,9 @@
 HELP.md
-target/
+player-service/target/
+designer-service/target/
+auth-service/target/
+api-gateway/target/
+eureka-server/target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

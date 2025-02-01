@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      routes:
+        - id: player-service
+          uri: lb://player-service
+          predicates:
+            - Path=/api/player/**
+        - id: designer-service
+          uri: lb://designer-service
+          predicates:
+            - Path=/api/designer/**
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+
+server:
+  port: 8080
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/

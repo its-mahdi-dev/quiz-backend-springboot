@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # Eureka Server
+  eureka-server:
+    image: eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - redis
+
+  # API Gateway
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://localhost:8761/
+
+  # Player Service
+  player-service:
+    image: player-service
+    container_name: player-service
+    ports:
+      - "8081:8081"
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/question?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=user1
+      - SPRING_DATASOURCE_PASSWORD=pass1
+
+  designer-service:
+    image: designer-service
+    container_name: designer-service
+    ports:
+      - "8082:8082"
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/question?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=user1
+      - SPRING_DATASOURCE_PASSWORD=pass1
+
+  auth-service:
+    image: auth-service
+    container_name: auth-service
+    ports:
+      - "8083:8083"
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - mysql
+    environment:
+    - SPRING_PROFILES_ACTIVE=docker
+    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/question?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    - SPRING_DATASOURCE_USERNAME=user1
+    - SPRING_DATASOURCE_PASSWORD=pass1
+
+  redis:
+    image: redis:6.0
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - microservices-network
+
+     # MySQL Service
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: question
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: pass1
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+    ports:
+      - "3306:3306"
+    networks:
+      - microservices-network
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 20s
+
+  nextjs-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/app
+    command: npm run dev
+    restart: always
+
+networks:
+  microservices-network:
+    driver: bridge  
