@@ -47,13 +47,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Question> questions;
-
-    @OneToMany(mappedBy = "following")
-    private List<Follow> following;
-
-    @OneToMany(mappedBy = "follower")
-    private List<Follow> followers;
-
+    
     @OneToMany(mappedBy = "user")
     private List<UserAnswer> userAnswers;
 

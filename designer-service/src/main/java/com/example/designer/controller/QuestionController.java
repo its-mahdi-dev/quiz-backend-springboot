@@ -12,12 +12,12 @@ import com.example.designer.model.Question;
 import com.example.designer.service.QuestionService;
 
 @RestController
-@RequestMapping("/api/designer")
+@RequestMapping("/api/designer/questions")
 public class QuestionController {
     @Autowired
     private QuestionService questionService;
 
-    @GetMapping("/questions")
+    @GetMapping("/")
     public ResponseEntity<?> getDesignerQuestion(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "10") int limit,
@@ -25,7 +25,7 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.getDesignerQuestions(page, limit, search));
     }
 
-    @PostMapping("/questions")
+    @PostMapping("/")
     public ResponseEntity<Question> addQuestion(@RequestAttribute("userId") Long userId,
             @Validated @RequestBody QuestionDTO questionDTO) {
         Question createdQuestion = questionService.createQuestion(questionDTO, userId);

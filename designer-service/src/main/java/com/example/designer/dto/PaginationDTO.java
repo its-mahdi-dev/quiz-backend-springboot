@@ -5,7 +5,6 @@ public class PaginationDTO {
     private int totalPages;
     private long totalItems;
 
-    // Getters and Setters
     public int getCurrentPage() {
         return currentPage;
     }

@@ -1,33 +1,18 @@
 package com.example.designer.service;
 
 import com.example.designer.dto.AnswerDTO;
-import com.example.designer.dto.PlayerQuestionDTO;
-import com.example.designer.dto.PlayerScoreDTO;
 import com.example.designer.dto.QuestionDTO;
 import com.example.designer.dto.UserDTO;
-import com.example.designer.exception.BadRequestException;
 import com.example.designer.model.Answer;
-import com.example.designer.model.Follow;
 import com.example.designer.model.Question;
-import com.example.designer.model.User;
-import com.example.designer.model.UserAnswer;
-import com.example.designer.model.UserType;
 import com.example.designer.repository.AnswerRepository;
-import com.example.designer.repository.CategoryRepository;
 import com.example.designer.repository.QuestionRepository;
 import com.example.designer.utils.DateUtils;
 
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,8 +132,4 @@ public class QuestionService {
         return meta;
     }
 
-    private Integer calculateDuration(Question question, Long duration) {
-        long newDuration = (duration != null) ? System.currentTimeMillis() - duration : 0;
-        return (int) (question.getDuration() - Math.ceil((double) newDuration / 1000));
-    }
 }
